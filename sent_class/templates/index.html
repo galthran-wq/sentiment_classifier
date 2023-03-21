@@ -19,6 +19,7 @@
             font-family: "Roboto Mono", "sant-serif"
         }
     </style>
+    
 </head>
 <body>
     <div class="container ">
@@ -26,12 +27,16 @@
         <hr\>
 
         <div class="row justify-content-md-center">
-            <div class="col col-md-4">
+            <div class="col col-md-6">
                 <div class="card shadow mt-5">    
                     <div class="card-header">Input Form</div>
                     <div class="card-body">
                         
+                        {% if predicted_rating %}
+                        <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+                        {% else %}
                         <h2 class="fst-italic text-secondary text-center">Results will be shown here</h2>
+                        {% endif %}
 
                         <form method="post" style="margin-top: 50px; margin-bottom: 30px;">
                         {% csrf_token %}
@@ -72,4 +77,44 @@
     </div>
 </form>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+        var xValues = [10, 9, 8, 7, 6, 4, 3, 2, 1];
+
+        var yValues = [];
+        var a = '{{predicted_rating}}';
+        a = a.replace(/&quot;/ig,'"');
+        var confidences = JSON.parse(a);
+
+        for (let value of xValues) {
+            yValues.push(confidences[value]);
+        } 
+        console.log(confidences)
+        new Chart("myChart", {
+            type: "bar",
+            data: {
+                labels: xValues,
+                datasets: [{
+                    // backgroundColor: barColors,
+                    data: yValues
+                }]
+            },
+            options: {
+                plugins: { 
+                    legend: {display: false}, 
+                    title: {
+                        display: true,
+                        text: "Confidences distribution"
+                    }
+                },
+                indexAxis: 'y',
+                elements: {
+                    bar: {
+                        borderWidth: 2,
+                    }
+                },
+                responsive: true,
+            }
+        });
+    </script>
 </html>
